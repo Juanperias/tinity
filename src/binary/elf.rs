@@ -16,7 +16,7 @@ fn create_text_section() -> Vec<u8> {
     let rd = 0x0A;  
     let funct3 = 0x00;  
     let rs1 = 0x0A;
-    let imm = 30;   
+    let imm = 1;   
     let instruction = (imm as u32) << 20
         | (rs1 as u32) << 15               
         | (funct3 as u32) << 12     
@@ -54,7 +54,7 @@ impl<'a> Elf<'a> {
                     size: content.len() as u64,
                     weak: false,
                     value: 0,
-                    scope: object::SymbolScope::Linkage,
+                    scope: object::SymbolScope::Dynamic,
                     flags: object::SymbolFlags::Elf {
                         st_info: 0x12,
                         st_other: 0,
