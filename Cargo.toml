@@ -1,0 +1,12 @@
+[package]
+name = "tinity"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Note: anyhow will be used only for prototyping.
+anyhow = "1.0.97"
+logos = "0.15.0"
+object = { version = "0.36.7", features = ["write"] }
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
