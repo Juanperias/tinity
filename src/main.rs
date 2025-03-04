@@ -1,14 +1,14 @@
+mod binary;
 mod parser;
 mod riscv;
-mod binary;
 
-use tracing::Level;
-use tracing::info;
-use tracing_subscriber::FmtSubscriber;
 use crate::parser::token::get_tokens;
 use binary::{elf::Elf, Binary, Section};
 use object::write::Object;
 use object::{Architecture, Endianness};
+use tracing::info;
+use tracing::Level;
+use tracing_subscriber::FmtSubscriber;
 
 fn main() {
     let subscriber = FmtSubscriber::builder()
@@ -19,7 +19,7 @@ fn main() {
 
     let input = std::fs::read_to_string("test.tir").unwrap();
     let tokens = get_tokens(input);
-    println!("{:?}", tokens); 
+    println!("{:?}", tokens);
 
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
 
@@ -27,6 +27,6 @@ fn main() {
 
     elf.create_section(Section::Text);
     elf.write_section(Section::Text, vec![]);
-    
+
     elf.save(&mut f).unwrap();
 }
