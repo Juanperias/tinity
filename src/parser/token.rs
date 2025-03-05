@@ -1,5 +1,7 @@
 use logos::Logos;
+use anyhow::{Result, anyhow};
 use tracing::error;
+
 
 #[derive(Logos, Debug, PartialEq)]
 #[logos(skip r"[ \t\n\f]+")]
@@ -31,24 +33,24 @@ pub enum Token {
     EndFn,
 }
 
-pub fn get_tokens(input: String) -> Vec<Token> {
+pub fn get_tokens(input: String) -> Result<Vec<Token>> {
     let mut lex = Token::lexer(&input);
     let mut tokens = Vec::new();
-    let mut good = true;
+    let mut has_errors = true;
 
     while let Some(token) = lex.next() {
         match token {
             Ok(t) => tokens.push(t),
             Err(_) => {
                 error!("Invalid Token {}", lex.slice());
-                good = false;
+                has_errors = false;
             }
         }
     }
 
-    if !good {
-        std::process::exit(1);
+    if !has_errors {
+        return Err(anyhow!("Cannot compile because: Syntax Error"));
     }
 
-    tokens
+    Ok(tokens)
 }

@@ -17,7 +17,7 @@ fn main() -> Result<()> {
     tracing::subscriber::set_global_default(subscriber)?;
 
     let input = std::fs::read_to_string("test.tir")?;
-    let tokens = get_tokens(input);
+    let tokens = get_tokens(input)?;
     println!("{:?}", tokens);
 
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
