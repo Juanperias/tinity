@@ -18,7 +18,6 @@ fn main() -> Result<()> {
 
     let input = std::fs::read_to_string("test.tir")?;
     let tokens = get_tokens(input)?;
-    println!("{:?}", tokens);
 
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
 

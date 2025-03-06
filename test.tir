@@ -1,3 +1,5 @@
 @fn _start
    @sum %a0, 2, 90, 30
+   @sum %a1, 3, 90
 @endfn
+
