@@ -14,7 +14,8 @@ pub enum AstNode {
     Load {
         dist: String,
         value: i64,
-    }
+    },
+    Syscall,
 }
 
 pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
@@ -48,6 +49,10 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
                     numbers: params.1,
                 });
             },
+            Token::Syscall => {
+                let current = current_function.as_mut().expect("Syscall outside of function");
+                current.body.push(AstNode::Syscall);
+            }
             Token::Load(params) => {
                 let current = current_function.as_mut().expect("Load outside of function");
 

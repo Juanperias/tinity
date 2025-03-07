@@ -1,4 +1,5 @@
 @fn _start
+   @load %a0, 0
    @load %a7, 93
-   @load %a0, 1
+   @syscall
 @endfn

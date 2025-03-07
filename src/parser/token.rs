@@ -41,6 +41,10 @@ pub enum Token {
         }
     )]
     Load((String, i64)),
+
+    #[token("@syscall")]
+    Syscall,
+
     #[token("@endfn")]
     EndFn,
 }
