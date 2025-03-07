@@ -18,7 +18,7 @@ fn main() -> Result<()> {
 
     let input = std::fs::read_to_string("test.tir")?;
     let tokens = get_tokens(input)?;
-    println!("{:#?}", crate::parser::ast::get_from_tokens(tokens));
+    println!("{:#?}", crate::parser::ast::get_from_tokens(tokens).unwrap()[0].clone());
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
 
     let mut f = std::fs::File::create("output.elf")?;
