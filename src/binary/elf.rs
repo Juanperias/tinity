@@ -14,20 +14,6 @@ pub struct Elf<'a> {
     pub text_id: Option<SectionId>,
 }
 
-fn create_text_section() -> Vec<u8> {
-    let opcode = 0x13;
-    let rd = 0x0A;
-    let funct3 = 0x00;
-    let rs1 = 0x0A;
-    let imm = 1;
-    let instruction = (imm as u32) << 20
-        | (rs1 as u32) << 15
-        | (funct3 as u32) << 12
-        | (rd as u32) << 7
-        | opcode as u32;
-    instruction.to_le_bytes().to_vec()
-}
-
 impl<'a> Elf<'a> {
     pub fn new(arch: Architecture, endianness: Endianness) -> Self {
         let obj = Object::new(BinaryFormat::Elf, arch, endianness);
@@ -35,6 +21,38 @@ impl<'a> Elf<'a> {
         Self {
             object: obj,
             text_id: None,
+        }
+    }
+    pub fn wwsection(&mut self, symbol: crate::riscv::symbol::Symbol) {
+        match Section::Text {
+            Section::Text => {
+                if let None = self.text_id {
+                    self.asection("text".to_string(), SectionKind::Text);
+                }
+
+                let text_id = self.text_id.unwrap();
+
+                let n = b"_start".to_vec();
+                
+                self.object.add_symbol(object::write::Symbol {
+                    section: object::write::SymbolSection::Section(text_id),
+                    name: symbol.name.as_bytes().to_vec(),
+                    kind: object::SymbolKind::Text,
+                    size: symbol.content.len() as u64,
+                    weak: false,
+                    value: 0,
+                    scope: object::SymbolScope::Linkage,
+                    flags: object::SymbolFlags::Elf {
+                        st_info: 0x12,
+                        st_other: 0,
+                    },
+                });
+                self.object.section_mut(text_id).append_data(
+                    &symbol.content,
+                    std::mem::align_of_val(&symbol.content).try_into().unwrap(),
+                );
+            }
+            _ => {}
         }
     }
     fn wsection(&mut self, content: Vec<u8>, section: Section) {
@@ -47,7 +65,7 @@ impl<'a> Elf<'a> {
                 let text_id = self.text_id.unwrap();
 
                 let n = b"_start".to_vec();
-                let content = create_text_section();
+                let content = Vec::new();
 
                 self.object.add_symbol(object::write::Symbol {
                     section: object::write::SymbolSection::Section(text_id),

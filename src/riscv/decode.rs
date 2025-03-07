@@ -16,3 +16,13 @@ pub fn node_to_opcode(node: AstNode) -> Vec<u8> {
     }
     opcode
 }
+
+pub fn from_nodes(nodes: Vec<AstNode>) -> Vec<u8> {
+    let mut opcode = Vec::new();
+    
+    for node in nodes {
+        opcode.extend(node_to_opcode(node));
+    }
+
+    opcode
+}

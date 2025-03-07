@@ -1,5 +1,6 @@
 use crate::parser::ast::AstNode;
 use crate::binary::Section;
+use super::decode::from_nodes;
 
 #[derive(Debug)]
 pub enum SymbolFlags {}
@@ -28,16 +29,31 @@ impl SymbolBuilder {
         }
     }
     #[must_use]
-    pub fn set_name(mut self, name: String) {
+    pub fn set_name(mut self, name: String) -> Self {
         self.symbol.name = name;
+        self
     }
     #[must_use]
-    pub fn set_section(mut self, section: Section) {
+    pub fn set_section(mut self, section: Section) -> Self {
         self.symbol.section = section;
+        self
     } 
     #[must_use]
-    pub fn set_content(mut self, content: Vec<u8>) {
+    pub fn set_content(mut self, content: Vec<u8>) -> Self {
         self.symbol.content = content;
+        self
+    }
+    #[must_use]
+    pub fn from_ast(mut self, node: AstNode) -> Self {
+        match node {
+            AstNode::Function { name, body } => {
+                self.symbol.name = name;
+                self.symbol.content = from_nodes(body);
+            },
+            _ => {}
+        }
+
+        self
     }
     pub fn build(self) -> Symbol {
         self.symbol
