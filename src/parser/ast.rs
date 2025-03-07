@@ -10,6 +10,10 @@ pub enum AstNode {
     Sum {
         numbers: Vec<i64>,
         dist: String
+    },
+    Load {
+        dist: String,
+        value: i64,
     }
 }
 
@@ -43,7 +47,15 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
                     dist: params.0,
                     numbers: params.1,
                 });
-            }
+            },
+            Token::Load(params) => {
+                let current = current_function.as_mut().expect("Load outside of function");
+
+                current.body.push(AstNode::Load {
+                    dist: params.0,
+                    value: params.1
+                });
+            },
             Token::EndFn => {
                 let current = current_function.take().expect("EndFn without matching Fn");
                 functions.push(AstNode::Function {

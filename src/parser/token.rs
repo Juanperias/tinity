@@ -1,6 +1,7 @@
 use logos::Logos;
 use anyhow::{Result, anyhow};
 use tracing::error;
+use logos::Source;
 
 
 #[derive(Logos, Debug, PartialEq)]
@@ -29,6 +30,17 @@ pub enum Token {
     })]
     Sum((String, Vec<i64>)),
 
+    #[regex(
+        r"@load\s+%(\w+)\s*,\s*(-?\d+)", 
+        |lex| {
+            let input: String = lex.slice().replace(" ", "").chars().skip(6).collect();
+            let parts = input.split(',');
+            let params: Vec<&str> = parts.collect();
+
+            (params[0].to_string(), params[1].parse::<i64>().unwrap())            
+        }
+    )]
+    Load((String, i64)),
     #[token("@endfn")]
     EndFn,
 }
