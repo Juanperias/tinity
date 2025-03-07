@@ -1,3 +1,6 @@
+use std::str::FromStr;
+
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Reg {
     Zero,
     Ra,
@@ -12,7 +15,7 @@ pub enum Reg {
     A0,
     A1,
     A2,
-    A3,
+A3,
     A4,
     A5,
     A6,
@@ -36,6 +39,61 @@ pub enum Reg {
     Mtvec,
     Mcause
 }
+
+impl FromStr for Reg {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "zero" => Ok(Reg::Zero),
+            "ra" => Ok(Reg::Ra),
+            "sp" => Ok(Reg::Sp),
+            "gp" => Ok(Reg::Gp),
+            "tp" => Ok(Reg::Tp),
+            "t0" => Ok(Reg::T0),
+            "t1" => Ok(Reg::T1),
+            "t2" => Ok(Reg::T2),
+            "s0" => Ok(Reg::S0),
+            "s1" => Ok(Reg::S1),
+            "a0" => Ok(Reg::A0),
+            "a1" => Ok(Reg::A1),
+            "a2" => Ok(Reg::A2),
+            "a3" => Ok(Reg::A3),
+            "a4" => Ok(Reg::A4),
+            "a5" => Ok(Reg::A5),
+            "a6" => Ok(Reg::A6),
+            "a7" => Ok(Reg::A7),
+            "s2" => Ok(Reg::S2),
+            "s3" => Ok(Reg::S3),
+            "s4" => Ok(Reg::S4),
+            "s5" => Ok(Reg::S5),
+            "s6" => Ok(Reg::S6),
+            "s7" => Ok(Reg::S7),
+            "s8" => Ok(Reg::S8),
+            "s9" => Ok(Reg::S9),
+            "s10" => Ok(Reg::S10),
+            "s11" => Ok(Reg::S11),
+            "t3" => Ok(Reg::T3),
+            "t4" => Ok(Reg::T4),
+            "t5" => Ok(Reg::T5),
+            "t6" => Ok(Reg::T6),
+            "mstatus" => Ok(Reg::Mstatus),
+            "mepc" => Ok(Reg::Mepc),
+            "mtvec" => Ok(Reg::Mtvec),
+            "mcause" => Ok(Reg::Mcause),
+            _ => Err(format!("Unknown register: {}", s)),
+        }
+    }
+}
+
+impl TryFrom<String> for Reg {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        Ok(Reg::from_str(&value)?)
+    }
+}
+
 
 impl Into<u64> for Reg {
     fn into(self) -> u64 {
