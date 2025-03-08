@@ -24,16 +24,17 @@ impl<'a> Elf<'a> {
             text_id: None,
         }
     }
-    pub fn wwsection(&mut self, symbol: symbol::Symbol) {
-        match Section::Text {
+    fn wsection(&mut self, section: Section, symbol: symbol::Symbol) {
+        match section {
             Section::Text => {
                 if let None = self.text_id {
                     self.asection("text".to_string(), SectionKind::Text);
                 }
 
-                let text_id = self.text_id.unwrap();
+                let text_id = self.text_id.unwrap(); 
 
-                let n = b"_start".to_vec();
+                let (st_info, scope) = if symbol.symbol_type == symbol::SymbolType::Private { (0x10, object::SymbolScope::Compilation) } else { (0x12, object::SymbolScope::Linkage) };
+                
                 
                 self.object.add_symbol(object::write::Symbol {
                     section: object::write::SymbolSection::Section(text_id),
@@ -42,48 +43,15 @@ impl<'a> Elf<'a> {
                     size: symbol.content.len() as u64,
                     weak: false,
                     value: 0,
-                    scope: object::SymbolScope::Linkage,
+                    scope,
                     flags: object::SymbolFlags::Elf {
-                        st_info: 0x12,
+                        st_info,
                         st_other: 0,
                     },
                 });
                 self.object.section_mut(text_id).append_data(
                     &symbol.content,
                     std::mem::align_of_val(&symbol.content).try_into().unwrap(),
-                );
-            }
-            _ => {}
-        }
-    }
-    fn wsection(&mut self, content: Vec<u8>, section: Section) {
-        match section {
-            Section::Text => {
-                if let None = self.text_id {
-                    self.asection("text".to_string(), SectionKind::Text);
-                }
-
-                let text_id = self.text_id.unwrap();
-
-                let n = b"_start".to_vec();
-                let content = Vec::new();
-
-                self.object.add_symbol(object::write::Symbol {
-                    section: object::write::SymbolSection::Section(text_id),
-                    name: n,
-                    kind: object::SymbolKind::Text,
-                    size: content.len() as u64,
-                    weak: false,
-                    value: 0,
-                    scope: object::SymbolScope::Linkage,
-                    flags: object::SymbolFlags::Elf {
-                        st_info: 0x12,
-                        st_other: 0,
-                    },
-                });
-                self.object.section_mut(text_id).append_data(
-                    &content,
-                    std::mem::align_of_val(&content).try_into().unwrap(),
                 );
             }
             _ => {}
@@ -107,8 +75,8 @@ impl Binary for Elf<'_> {
         target.write_all(&content)?;
         Ok(())
     }
-    fn write_section(&mut self, section: Section, content: Vec<u8>) {
-        self.wsection(content, section);
+    fn write_section(&mut self, section: Section, symbol: symbol::Symbol) {
+        self.wsection(section, symbol);
     }
     fn create_section(&mut self, section: Section) {
         match section {

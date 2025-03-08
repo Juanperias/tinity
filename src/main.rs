@@ -31,7 +31,8 @@ fn main() -> Result<()> {
         .build();
 
     elf.create_section(Section::Text);
-    elf.wwsection(symbol);
+    elf.write_section(Section::Text, symbol);
+    
 
     elf.save(&mut f).unwrap();
 
