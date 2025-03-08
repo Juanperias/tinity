@@ -41,9 +41,14 @@ fn main() -> Result<()> {
     elf.create_section(Section::Text);
 
     ast.iter().for_each(|node| {
-        let symbol = SymbolBuilder::new().from_ast(&node, &functions).build();
+        let builder = SymbolBuilder::new().from_ast(&node, &functions);
 
-        elf.write_section(Section::Text, symbol);
+        if let Ok(builder) = builder {
+            let symbol = builder.build();
+            elf.write_section(Section::Text, symbol);
+        } else if let Err(e) = builder {
+            eprintln!("Error processing AST: {}", e);
+        }
     });
 
     elf.save(&mut f).unwrap();

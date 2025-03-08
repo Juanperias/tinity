@@ -54,17 +54,17 @@ impl SymbolBuilder {
         self
     }
     #[must_use]
-    pub fn from_ast(mut self, node: &AstNode, functions: &HashMap<String, u64>) -> Self {
+    pub fn from_ast(mut self, node: &AstNode, functions: &HashMap<String, u64>) -> Result<Self, anyhow::Error> {
         match node {
             AstNode::Function { name, body, stype, .. } => {
                 self.symbol.name = name.to_string();
                 self.symbol.symbol_type = *stype;
-                self.symbol.content = from_nodes(body.to_vec(), functions);
+                self.symbol.content = from_nodes(body.to_vec(), functions)?;
             }
             _ => {}
         }
 
-        self
+        Ok(self)
     }
     pub fn build(self) -> Symbol {
         self.symbol
