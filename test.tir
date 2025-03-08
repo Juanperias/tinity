@@ -4,3 +4,8 @@ $global
    @load %a7, 93
    @syscall
 @endfn
+
+$global
+@fn test
+   @load %a0, 2
+@endfn

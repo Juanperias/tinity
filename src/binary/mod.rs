@@ -6,7 +6,6 @@ use object::write::SectionId;
 use std::fs::File;
 use symbol::Symbol;
 
-
 #[derive(Debug)]
 pub enum Section {
     Text,

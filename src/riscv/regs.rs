@@ -15,7 +15,7 @@ pub enum Reg {
     A0,
     A1,
     A2,
-A3,
+    A3,
     A4,
     A5,
     A6,
@@ -37,7 +37,7 @@ A3,
     Mstatus,
     Mepc,
     Mtvec,
-    Mcause
+    Mcause,
 }
 
 impl FromStr for Reg {
@@ -94,7 +94,6 @@ impl TryFrom<String> for Reg {
     }
 }
 
-
 impl Into<u64> for Reg {
     fn into(self) -> u64 {
         match self {
@@ -133,7 +132,7 @@ impl Into<u64> for Reg {
             Reg::Mstatus => 0x300,
             Reg::Mepc => 0x341,
             Reg::Mtvec => 0x305,
-            Reg::Mcause => 0x342
+            Reg::Mcause => 0x342,
         }
     }
 }

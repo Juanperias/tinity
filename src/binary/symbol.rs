@@ -1,11 +1,11 @@
-use crate::parser::ast::AstNode;
 use crate::binary::Section;
+use crate::parser::ast::AstNode;
 use crate::riscv::decode::from_nodes;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SymbolType {
     Global,
-    Private
+    Private,
 }
 
 #[derive(Debug)]
@@ -13,12 +13,12 @@ pub struct Symbol {
     pub name: String,
     pub section: Section,
     pub symbol_type: SymbolType,
-    pub content: Vec<u8>
+    pub content: Vec<u8>,
 }
 
 #[derive(Debug)]
 pub struct SymbolBuilder {
-    pub symbol: Symbol
+    pub symbol: Symbol,
 }
 
 impl SymbolBuilder {
@@ -41,7 +41,7 @@ impl SymbolBuilder {
     pub fn set_section(mut self, section: Section) -> Self {
         self.symbol.section = section;
         self
-    } 
+    }
     #[must_use]
     pub fn set_content(mut self, content: Vec<u8>) -> Self {
         self.symbol.content = content;
@@ -53,13 +53,13 @@ impl SymbolBuilder {
         self
     }
     #[must_use]
-    pub fn from_ast(mut self, node: AstNode) -> Self {
+    pub fn from_ast(mut self, node: &AstNode) -> Self {
         match node {
             AstNode::Function { name, body, stype } => {
-                self.symbol.name = name;
-                self.symbol.symbol_type = stype;
-                self.symbol.content = from_nodes(body);
-            },
+                self.symbol.name = name.to_string();
+                self.symbol.symbol_type = *stype;
+                self.symbol.content = from_nodes(body.to_vec());
+            }
             _ => {}
         }
 
@@ -69,4 +69,3 @@ impl SymbolBuilder {
         self.symbol
     }
 }
-

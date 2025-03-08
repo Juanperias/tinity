@@ -33,6 +33,6 @@ pub fn addi(dist: Reg, rs1: Reg, val: i64) -> Vec<u8> {
         opcode: 0x13,
         rs1,
         rd: dist,
-        imm: val
+        imm: val,
     })
 }

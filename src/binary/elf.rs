@@ -1,3 +1,4 @@
+use super::symbol;
 use super::{Binary, Section};
 use anyhow::Result;
 use object::write::Object;
@@ -7,12 +8,12 @@ use object::{
 };
 use std::fs::File;
 use std::io::Write;
-use super::symbol;
 
 // High level abstraccion of Object
 pub struct Elf<'a> {
     pub object: Object<'a>,
     pub text_id: Option<SectionId>,
+    pub current_tvalue: u64,
 }
 
 impl<'a> Elf<'a> {
@@ -22,6 +23,7 @@ impl<'a> Elf<'a> {
         Self {
             object: obj,
             text_id: None,
+            current_tvalue: 0,
         }
     }
     fn wsection(&mut self, section: Section, symbol: symbol::Symbol) {
@@ -31,28 +33,33 @@ impl<'a> Elf<'a> {
                     self.asection("text".to_string(), SectionKind::Text);
                 }
 
-                let text_id = self.text_id.unwrap(); 
+                let text_id = self.text_id.unwrap();
 
-                let (st_info, scope) = if symbol.symbol_type == symbol::SymbolType::Private { (0x10, object::SymbolScope::Compilation) } else { (0x12, object::SymbolScope::Linkage) };
-                
-                
+                let (st_info, scope) = if symbol.symbol_type == symbol::SymbolType::Private {
+                    (0x10, object::SymbolScope::Compilation)
+                } else {
+                    (0x12, object::SymbolScope::Linkage)
+                };
+
                 self.object.add_symbol(object::write::Symbol {
                     section: object::write::SymbolSection::Section(text_id),
                     name: symbol.name.as_bytes().to_vec(),
                     kind: object::SymbolKind::Text,
                     size: symbol.content.len() as u64,
                     weak: false,
-                    value: 0,
+                    value: self.current_tvalue,
                     scope,
                     flags: object::SymbolFlags::Elf {
                         st_info,
                         st_other: 0,
                     },
                 });
-                self.object.section_mut(text_id).append_data(
-                    &symbol.content,
-                    std::mem::align_of_val(&symbol.content).try_into().unwrap(),
-                );
+
+                self.current_tvalue += symbol.content.len() as u64;
+
+                self.object
+                    .section_mut(text_id)
+                    .append_data(&symbol.content, 4);
             }
             _ => {}
         }

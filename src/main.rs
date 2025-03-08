@@ -2,14 +2,14 @@ mod binary;
 mod parser;
 mod riscv;
 
+use anyhow::Result;
+use binary::symbol::SymbolBuilder;
+use binary::{elf::Elf, Binary, Section};
+use object::{Architecture, Endianness};
 use parser::ast::get_from_tokens;
 use parser::token::get_tokens;
-use binary::{elf::Elf, Binary, Section};
-use anyhow::Result;
-use object::{Architecture, Endianness};
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
-use binary::symbol::SymbolBuilder;
 
 fn main() -> Result<()> {
     let subscriber = FmtSubscriber::builder()
@@ -25,14 +25,13 @@ fn main() -> Result<()> {
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
 
     let mut f = std::fs::File::create("output.elf")?;
-
-    let symbol = SymbolBuilder::new()
-        .from_ast(ast[0].clone())
-        .build();
-
     elf.create_section(Section::Text);
-    elf.write_section(Section::Text, symbol);
-    
+
+    ast.iter().for_each(|node| {
+        let symbol = SymbolBuilder::new().from_ast(&node).build();
+
+        elf.write_section(Section::Text, symbol);
+    });
 
     elf.save(&mut f).unwrap();
 

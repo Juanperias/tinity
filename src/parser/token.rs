@@ -1,5 +1,5 @@
+use anyhow::{anyhow, Result};
 use logos::Logos;
-use anyhow::{Result, anyhow};
 use tracing::error;
 
 #[derive(Logos, Debug, PartialEq)]
@@ -27,7 +27,7 @@ pub enum Token {
         (dist, numbers)
     })]
     Sum((String, Vec<i64>)),
-    
+
     #[token("$global")]
     Global,
 

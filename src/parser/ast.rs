@@ -1,6 +1,6 @@
 use super::token::Token;
-use anyhow::{Result, anyhow};
 use crate::binary::symbol::SymbolType;
+use anyhow::{anyhow, Result};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AstNode {
@@ -11,7 +11,7 @@ pub enum AstNode {
     },
     Sum {
         numbers: Vec<i64>,
-        dist: String
+        dist: String,
     },
     Load {
         dist: String,
@@ -35,7 +35,7 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
         match token {
             Token::Fn(name) => {
                 if current_function.is_some() {
-                    return Err(anyhow!(format!("Nested function {} is not allowed", name))); 
+                    return Err(anyhow!(format!("Nested function {} is not allowed", name)));
                 }
                 current_function = Some(CurrentFunction {
                     name,
@@ -45,15 +45,19 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
             Token::Sum(params) => {
                 let current = current_function.as_mut().expect("Sum outside of function");
                 if params.1.len() < 2 {
-                    return Err(anyhow!("In a sum there must have been at least two parameters"));
+                    return Err(anyhow!(
+                        "In a sum there must have been at least two parameters"
+                    ));
                 }
                 current.body.push(AstNode::Sum {
                     dist: params.0,
                     numbers: params.1,
                 });
-            },
+            }
             Token::Syscall => {
-                let current = current_function.as_mut().expect("Syscall outside of function");
+                let current = current_function
+                    .as_mut()
+                    .expect("Syscall outside of function");
                 current.body.push(AstNode::Syscall);
             }
             Token::Load(params) => {
@@ -61,20 +65,20 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
 
                 current.body.push(AstNode::Load {
                     dist: params.0,
-                    value: params.1
+                    value: params.1,
                 });
-            },
+            }
             Token::Global => {
                 stype = SymbolType::Global;
-            },
+            }
             Token::EndFn => {
                 let current = current_function.take().expect("EndFn without matching Fn");
                 functions.push(AstNode::Function {
                     name: current.name,
                     body: current.body,
-                    stype
+                    stype,
                 });
-            },
+            }
         }
     }
 
@@ -84,4 +88,3 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
 
     Ok(functions)
 }
-
