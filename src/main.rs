@@ -26,9 +26,14 @@ fn main() -> Result<()> {
 
     let mut f = std::fs::File::create("output.elf")?;
     elf.create_section(Section::Text);
+    let mut t = false;
 
     ast.iter().for_each(|node| {
-        let symbol = SymbolBuilder::new().from_ast(&node).build();
+            let mut symbol = SymbolBuilder::new().from_ast(&node).build();
+        if !t { 
+            symbol.content = riscv::jmp::encode_jal(0x4, 0x0, 0xC);
+            t = true;
+        }
 
         elf.write_section(Section::Text, symbol);
     });
