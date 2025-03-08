@@ -27,6 +27,9 @@ pub enum Token {
         (dist, numbers)
     })]
     Sum((String, Vec<i64>)),
+    
+    #[token("$global")]
+    Global,
 
     #[regex(
         r"@load\s+%(\w+)\s*,\s*(-?\d+)", 

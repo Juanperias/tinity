@@ -1,10 +1,12 @@
 use super::token::Token;
 use anyhow::{Result, anyhow};
+use crate::binary::symbol::SymbolType;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AstNode {
     Function {
         name: String,
+        stype: SymbolType,
         body: Vec<AstNode>,
     },
     Sum {
@@ -25,6 +27,7 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
         body: Vec<AstNode>,
     }
 
+    let mut stype = SymbolType::Private;
     let mut functions = Vec::new();
     let mut current_function: Option<CurrentFunction> = None;
 
@@ -61,13 +64,17 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
                     value: params.1
                 });
             },
+            Token::Global => {
+                stype = SymbolType::Global;
+            },
             Token::EndFn => {
                 let current = current_function.take().expect("EndFn without matching Fn");
                 functions.push(AstNode::Function {
                     name: current.name,
                     body: current.body,
+                    stype
                 });
-            }
+            },
         }
     }
 

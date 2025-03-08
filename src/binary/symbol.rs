@@ -2,7 +2,7 @@ use crate::parser::ast::AstNode;
 use crate::binary::Section;
 use crate::riscv::decode::from_nodes;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SymbolType {
     Global,
     Private
@@ -55,8 +55,9 @@ impl SymbolBuilder {
     #[must_use]
     pub fn from_ast(mut self, node: AstNode) -> Self {
         match node {
-            AstNode::Function { name, body } => {
+            AstNode::Function { name, body, stype } => {
                 self.symbol.name = name;
+                self.symbol.symbol_type = stype;
                 self.symbol.content = from_nodes(body);
             },
             _ => {}
