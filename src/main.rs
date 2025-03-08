@@ -10,6 +10,15 @@ use parser::ast::get_from_tokens;
 use parser::token::get_tokens;
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
+use clap::Parser;
+
+#[derive(Parser)]
+struct Args {
+    file: String,
+
+    #[clap(short, long)]
+    output: Option<String>
+}
 
 fn main() -> Result<()> {
     let subscriber = FmtSubscriber::builder()
@@ -18,19 +27,28 @@ fn main() -> Result<()> {
 
     tracing::subscriber::set_global_default(subscriber)?;
 
-    let input = std::fs::read_to_string("test.tir")?;
+    let args = Args::parse();
+
+    let input = std::fs::read_to_string(args.file)?;
     let tokens = get_tokens(input)?;
     let (ast, functions) = get_from_tokens(tokens)?;
 
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
 
-    let mut f = std::fs::File::create("output.elf")?;
+    let output = args.output.unwrap_or("output.elf".to_string());
+
+    let mut f = std::fs::File::create(output)?;
     elf.create_section(Section::Text);
 
     ast.iter().for_each(|node| {
-        let symbol = SymbolBuilder::new().from_ast(&node, &functions).build();
- 
-        elf.write_section(Section::Text, symbol);
+        let builder = SymbolBuilder::new().from_ast(&node, &functions);
+
+        if let Ok(builder) = builder {
+            let symbol = builder.build();
+            elf.write_section(Section::Text, symbol);
+        } else if let Err(e) = builder {
+            eprintln!("Error processing AST: {}", e);
+        }
     });
 
     elf.save(&mut f).unwrap();
