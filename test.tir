@@ -1,10 +1,17 @@
 $global
 @fn _start
-   @go exit
+   @go set_a0
+   @go set_a7
+   @syscall
 @endfn
 
-@fn exit
-   @load %a0, 0
-   @load %a7, 93
-   @syscall
+
+@fn set_a0
+  @load %a0, 0
+  @ret
+@endfn
+
+@fn set_a7
+  @load %a7, 93
+  @ret
 @endfn

@@ -34,6 +34,9 @@ pub enum Token {
     })]
     Go(String),
 
+    #[token("@ret")]
+    Ret,
+
     #[token("$global")]
     Global,
 

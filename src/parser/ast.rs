@@ -24,6 +24,7 @@ pub enum AstNode {
         target: String,
         pc: u64,
     },
+    Ret
 }
 
 pub fn get_from_tokens(tokens: Vec<Token>) -> Result<(Vec<AstNode>, HashMap<String, u64>)> {
@@ -94,6 +95,13 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<(Vec<AstNode>, HashMap<Stri
             },
             Token::Global => {
                 stype = SymbolType::Global;
+            },
+            Token::Ret => {
+                let current = current_function.as_mut().expect("Ret outside of function");
+ 
+                current.body.push(AstNode::Ret);
+
+                current_pc += 4;
             },
             Token::EndFn => {
                 let current = current_function.take().expect("EndFn without matching Fn");

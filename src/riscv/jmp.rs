@@ -1,4 +1,14 @@
 use super::regs::Reg;
+use super::immediate::{ImmediateInstruction, immediate_to_endian};
+
+pub fn jarl(dist: Reg, rs1: Reg, offset: i64) -> Vec<u8> {
+    immediate_to_endian(ImmediateInstruction {
+        rs1,
+        rd: dist,
+        imm: offset,
+        opcode: 0x67,
+    })
+}
 
 pub fn jal(target_pc: u64, current_pc: u64, rd: Reg) -> Vec<u8> {
     let offset = target_pc.wrapping_sub(current_pc) as i32;

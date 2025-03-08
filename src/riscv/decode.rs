@@ -1,5 +1,5 @@
 use super::immediate::{addi, ecall};
-use super::jmp::jal;
+use super::jmp::{jal, jarl};
 use super::regs::Reg;
 use crate::parser::ast::AstNode;
 use std::convert::TryFrom;
@@ -26,6 +26,9 @@ pub fn node_to_opcode(node: AstNode, functions: &HashMap<String, u64>) -> Opcode
             //TODO: improve Option handling instead of using unwrap
             opcode.extend(jal(*functions.get(&target).unwrap(), pc, Reg::Ra));
         },
+        AstNode::Ret => {
+            opcode.extend(jarl(Reg::Zero, Reg::Ra, 0));
+        }
     }
     opcode
 }
