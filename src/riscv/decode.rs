@@ -1,14 +1,21 @@
 use crate::parser::ast::AstNode;
 use super::regs::Reg;
 use super::immediate::{addi, ecall};
+use std::convert::TryFrom;
 
-pub fn node_to_opcode(node: AstNode) -> Vec<u8> {
+type Opcode = Vec<u8>;
+
+pub fn node_to_opcode(node: AstNode) -> Opcode {
     let mut opcode = Vec::new();
     match node {
-        AstNode::Function { name, body } => {},
-        AstNode::Sum { numbers, dist } => {},
+        AstNode::Function { .. } => {},
+        AstNode::Sum { .. } => {},
         AstNode::Load { dist, value } => {
-            opcode.extend(addi(Reg::try_from(dist).unwrap(), Reg::Zero, value));
+            if let Ok(reg) = Reg::try_from(dist.clone()) {
+                opcode.extend(addi(reg, Reg::Zero, value));
+            } else {
+                eprintln!("Invalid register: {}", dist);
+            }
         },
         AstNode::Syscall => {
             opcode.extend(ecall());
@@ -17,12 +24,9 @@ pub fn node_to_opcode(node: AstNode) -> Vec<u8> {
     opcode
 }
 
-pub fn from_nodes(nodes: Vec<AstNode>) -> Vec<u8> {
-    let mut opcode = Vec::new();
-    
-    for node in nodes {
-        opcode.extend(node_to_opcode(node));
-    }
-
-    opcode
+pub fn from_nodes(nodes: Vec<AstNode>) -> Opcode {
+    nodes.into_iter()
+         .flat_map(node_to_opcode)
+         .collect()
 }
+
