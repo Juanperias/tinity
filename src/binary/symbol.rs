@@ -1,6 +1,7 @@
 use crate::binary::Section;
 use crate::parser::ast::AstNode;
 use crate::riscv::decode::from_nodes;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SymbolType {
@@ -53,12 +54,12 @@ impl SymbolBuilder {
         self
     }
     #[must_use]
-    pub fn from_ast(mut self, node: &AstNode) -> Self {
+    pub fn from_ast(mut self, node: &AstNode, functions: &HashMap<String, u64>) -> Self {
         match node {
             AstNode::Function { name, body, stype, .. } => {
                 self.symbol.name = name.to_string();
                 self.symbol.symbol_type = *stype;
-                self.symbol.content = from_nodes(body.to_vec());
+                self.symbol.content = from_nodes(body.to_vec(), functions);
             }
             _ => {}
         }

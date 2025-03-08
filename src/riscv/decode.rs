@@ -1,11 +1,13 @@
 use super::immediate::{addi, ecall};
+use super::jmp::jal;
 use super::regs::Reg;
 use crate::parser::ast::AstNode;
 use std::convert::TryFrom;
+use std::collections::HashMap;
 
 type Opcode = Vec<u8>;
 
-pub fn node_to_opcode(node: AstNode) -> Opcode {
+pub fn node_to_opcode(node: AstNode, functions: &HashMap<String, u64>) -> Opcode {
     let mut opcode = Vec::new();
     match node {
         AstNode::Function { .. } => {}
@@ -19,11 +21,15 @@ pub fn node_to_opcode(node: AstNode) -> Opcode {
         }
         AstNode::Syscall => {
             opcode.extend(ecall());
-        }
+        },
+        AstNode::Go { target, pc } => {
+            //TODO: improve Option handling instead of using unwrap
+            opcode.extend(jal(*functions.get(&target).unwrap(), pc, Reg::Ra));
+        },
     }
     opcode
 }
 
-pub fn from_nodes(nodes: Vec<AstNode>) -> Opcode {
-    nodes.into_iter().flat_map(node_to_opcode).collect()
+pub fn from_nodes(nodes: Vec<AstNode>, functions: &HashMap<String, u64>) -> Opcode {
+    nodes.into_iter().flat_map(|node| node_to_opcode(node, functions)).collect()
 }

@@ -20,21 +20,16 @@ fn main() -> Result<()> {
 
     let input = std::fs::read_to_string("test.tir")?;
     let tokens = get_tokens(input)?;
-    let ast = get_from_tokens(tokens)?;
+    let (ast, functions) = get_from_tokens(tokens)?;
     println!("{:#?}", ast);
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
 
     let mut f = std::fs::File::create("output.elf")?;
     elf.create_section(Section::Text);
-    let mut t = false;
 
     ast.iter().for_each(|node| {
-            let mut symbol = SymbolBuilder::new().from_ast(&node).build();
-        if !t { 
-            symbol.content = riscv::jmp::encode_jal(0x4, 0x0, 0xC);
-            t = true;
-        }
-
+        let symbol = SymbolBuilder::new().from_ast(&node, &functions).build();
+ 
         elf.write_section(Section::Text, symbol);
     });
 

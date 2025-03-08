@@ -1,12 +1,9 @@
 $global
 @fn _start
-   @load %a0, 0
-   @load %a7, 93
-   @syscall
+   @go exit
 @endfn
 
-$global
-@fn test
+@fn exit
    @load %a0, 0
    @load %a7, 93
    @syscall

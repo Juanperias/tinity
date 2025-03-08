@@ -28,6 +28,12 @@ pub enum Token {
     })]
     Sum((String, Vec<i64>)),
 
+    #[regex(r"@go\s+([a-zA-Z_][a-zA-Z0-9_]*)", |lex| {
+        let last = lex.slice();
+        last.split_whitespace().nth(1).unwrap().to_string()
+    })]
+    Go(String),
+
     #[token("$global")]
     Global,
 

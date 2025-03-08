@@ -1,6 +1,9 @@
-pub fn encode_jal(target_pc: u64, current_pc: u64, rd: u64) -> Vec<u8> {
+use super::regs::Reg;
+
+pub fn jal(target_pc: u64, current_pc: u64, rd: Reg) -> Vec<u8> {
     let offset = target_pc.wrapping_sub(current_pc) as i32;
-    
+    let rd: u64 = rd.into();
+
     if offset < -1048576 || offset > 1048574 {
         panic!("invalid offset");
     }

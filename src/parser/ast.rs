@@ -1,6 +1,7 @@
 use super::token::Token;
 use anyhow::{Result, anyhow};
 use crate::binary::symbol::SymbolType;
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AstNode {
@@ -19,9 +20,13 @@ pub enum AstNode {
         value: i64,
     },
     Syscall,
+    Go {
+        target: String,
+        pc: u64,
+    },
 }
 
-pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
+pub fn get_from_tokens(tokens: Vec<Token>) -> Result<(Vec<AstNode>, HashMap<String, u64>)> {
     #[derive(Debug)]
     struct CurrentFunction {
         name: String,
@@ -34,6 +39,9 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
     let mut functions = Vec::new();
     let mut current_function: Option<CurrentFunction> = None;
     let mut current_pc = 0x0;
+    // Contains the PC addr of all functions
+    let mut functions_hashmap = HashMap::new();
+
 
     for token in tokens {
         match token {
@@ -41,6 +49,7 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
                 if current_function.is_some() {
                     return Err(anyhow!(format!("Nested function {} is not allowed", name))); 
                 }
+
                 current_function = Some(CurrentFunction {
                     name,                    
                     body: Vec::new(),
@@ -57,6 +66,15 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
                     numbers: params.1,
                 });
                 //current_pc += 4;
+            },
+            Token::Go(target) => {
+                let current = current_function.as_mut().expect("Go outside of function");
+                current.body.push(AstNode::Go {
+                    pc: current_pc,
+                    target
+                });
+
+                current_pc += 4;
             },
             Token::Syscall => {
                 let current = current_function.as_mut().expect("Syscall outside of function");
@@ -80,11 +98,13 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
             Token::EndFn => {
                 let current = current_function.take().expect("EndFn without matching Fn");
                 functions.push(AstNode::Function {
-                    name: current.name,
+                    name: current.name.clone(),
                     body: current.body,
                     pc: current.pc,
                     stype
                 });
+
+                functions_hashmap.insert(current.name, current.pc);
             },
         }
     }
@@ -93,6 +113,6 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<Vec<AstNode>> {
         return Err(anyhow!("A function has not been closed"));
     }
 
-    Ok(functions)
+    Ok((functions, functions_hashmap))
 }
 
