@@ -3,13 +3,16 @@ use crate::binary::Section;
 use super::decode::from_nodes;
 
 #[derive(Debug)]
-pub enum SymbolFlags {}
+pub enum SymbolType {
+    Global,
+    Private
+}
 
 #[derive(Debug)]
 pub struct Symbol {
     pub name: String,
     pub section: Section,
-    //pub flags: SymbolFlags,
+    pub symbol_type: SymbolType,
     pub content: Vec<u8>
 }
 
@@ -23,6 +26,7 @@ impl SymbolBuilder {
         SymbolBuilder {
             symbol: Symbol {
                 name: "empty".to_string(),
+                symbol_type: SymbolType::Private,
                 content: Vec::new(),
                 section: Section::Note,
             },
@@ -41,6 +45,11 @@ impl SymbolBuilder {
     #[must_use]
     pub fn set_content(mut self, content: Vec<u8>) -> Self {
         self.symbol.content = content;
+        self
+    }
+    #[must_use]
+    pub fn set_type(mut self, new_type: SymbolType) -> Self {
+        self.symbol.symbol_type = new_type;
         self
     }
     #[must_use]
