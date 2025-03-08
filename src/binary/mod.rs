@@ -1,7 +1,10 @@
 pub mod elf;
+pub mod symbol;
+
 use anyhow::Result;
 use object::write::SectionId;
 use std::fs::File;
+
 
 #[derive(Debug)]
 pub enum Section {

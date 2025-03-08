@@ -7,6 +7,7 @@ use object::{
 };
 use std::fs::File;
 use std::io::Write;
+use super::symbol;
 
 // High level abstraccion of Object
 pub struct Elf<'a> {
@@ -23,7 +24,7 @@ impl<'a> Elf<'a> {
             text_id: None,
         }
     }
-    pub fn wwsection(&mut self, symbol: crate::riscv::symbol::Symbol) {
+    pub fn wwsection(&mut self, symbol: symbol::Symbol) {
         match Section::Text {
             Section::Text => {
                 if let None = self.text_id {

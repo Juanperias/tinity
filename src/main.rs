@@ -9,7 +9,7 @@ use anyhow::Result;
 use object::{Architecture, Endianness};
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
-use riscv::symbol::SymbolBuilder;
+use binary::symbol::SymbolBuilder;
 
 fn main() -> Result<()> {
     let subscriber = FmtSubscriber::builder()

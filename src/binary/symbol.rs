@@ -1,6 +1,6 @@
 use crate::parser::ast::AstNode;
 use crate::binary::Section;
-use super::decode::from_nodes;
+use crate::riscv::decode::from_nodes;
 
 #[derive(Debug)]
 pub enum SymbolType {
