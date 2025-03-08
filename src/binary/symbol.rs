@@ -55,7 +55,7 @@ impl SymbolBuilder {
     #[must_use]
     pub fn from_ast(mut self, node: &AstNode) -> Self {
         match node {
-            AstNode::Function { name, body, stype } => {
+            AstNode::Function { name, body, stype, .. } => {
                 self.symbol.name = name.to_string();
                 self.symbol.symbol_type = *stype;
                 self.symbol.content = from_nodes(body.to_vec());

@@ -7,5 +7,5 @@ $global
 
 $global
 @fn test
-   @load %a0, 2
+   @load %a0, 0
 @endfn
