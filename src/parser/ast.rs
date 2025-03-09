@@ -62,11 +62,13 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<(Vec<AstNode>, HashMap<Stri
                 if params.1.len() < 2 {
                     return Err(anyhow!("In a sum there must have been at least two parameters"));
                 }
+
                 current.body.push(AstNode::Sum {
                     dist: params.0,
                     numbers: params.1,
                 });
-                //current_pc += 4;
+                
+                current_pc += 4;
             },
             Token::Go(target) => {
                 let current = current_function.as_mut().expect("Go outside of function");

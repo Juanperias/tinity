@@ -1,4 +1,4 @@
 /target
 result*
-output.elf
-output
+test.o
+test

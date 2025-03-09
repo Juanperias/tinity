@@ -15,7 +15,7 @@ pub fn jal(target_pc: u64, current_pc: u64, rd: Reg) -> Vec<u8> {
     let rd: u64 = rd.into();
 
     if offset < -1048576 || offset > 1048574 {
-        panic!("invalid offset");
+        panic!("invalid offset: too big");
     }
 
     if (offset % 2) != 0 {

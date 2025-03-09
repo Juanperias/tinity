@@ -1,17 +1,12 @@
 $global
 @fn _start
    @go set_a0
-   @go set_a7
+   @sum %a7, 10, 10, 0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 3	
    @syscall
 @endfn
-
 
 @fn set_a0
   @load %a0, 0
   @ret
 @endfn
 
-@fn set_a7
-  @load %a7, 93
-  @ret
-@endfn

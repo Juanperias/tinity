@@ -11,6 +11,7 @@ use parser::token::get_tokens;
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 use clap::Parser;
+use tracing::error;
 
 #[derive(Parser)]
 struct Args {
@@ -47,7 +48,7 @@ fn main() -> Result<()> {
             let symbol = builder.build();
             elf.write_section(Section::Text, symbol);
         } else if let Err(e) = builder {
-            eprintln!("Error processing AST: {}", e);
+            error!("Error processing AST: {}", e);
         }
     });
 

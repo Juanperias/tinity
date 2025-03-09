@@ -12,7 +12,14 @@ pub fn node_to_opcode(node: AstNode, functions: &HashMap<String, u64>) -> Result
     let mut opcode = Vec::new();
     match node {
         AstNode::Function { .. } => {}
-        AstNode::Sum { .. } => {}
+        AstNode::Sum { numbers, dist } => {
+             let reg = Reg::try_from(dist.clone())
+                .map_err(|_| anyhow::anyhow!("Invalid register: {}", dist))?;
+            let result = numbers.iter().sum();
+
+            opcode.extend(addi(reg, Reg::Zero, result));
+
+        }
         AstNode::Load { dist, value } => {
             let reg = Reg::try_from(dist.clone())
                 .map_err(|_| anyhow::anyhow!("Invalid register: {}", dist))?;
