@@ -11,7 +11,7 @@ use parser::token::get_tokens;
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 use clap::Parser;
-use tracing::error;
+use tracing::{error, info};
 
 #[derive(Parser)]
 struct Args {
@@ -28,6 +28,8 @@ fn main() -> Result<()> {
 
     tracing::subscriber::set_global_default(subscriber)?;
 
+    info!("Starting compilation");
+
     let args = Args::parse();
 
     let input = std::fs::read_to_string(args.file)?;
@@ -35,6 +37,7 @@ fn main() -> Result<()> {
     let (ast, functions) = get_from_tokens(tokens)?;
 
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
+    info!("Generating dist file");
 
     let output = args.output.unwrap_or("output.elf".to_string());
 
@@ -53,6 +56,9 @@ fn main() -> Result<()> {
     });
 
     elf.save(&mut f).unwrap();
+
+    info!("Compiled successfully");
+
 
     Ok(())
 }
