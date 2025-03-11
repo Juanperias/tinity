@@ -1,12 +1,19 @@
 use crate::binary::Section;
 use crate::parser::ast::AstNode;
-use crate::riscv::decode::from_nodes;
+use crate::riscv::decode::{from_nodes, DecodeError};
 use std::collections::HashMap;
+use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SymbolType {
     Global,
     Private,
+}
+
+#[derive(Error, Debug)]
+pub enum SymbolError {
+    #[error("Decode error: {0}")]
+    DecodeError(#[from] DecodeError)
 }
 
 #[derive(Debug)]
@@ -54,9 +61,15 @@ impl SymbolBuilder {
         self
     }
     #[must_use]
-    pub fn from_ast(mut self, node: &AstNode, functions: &HashMap<String, u64>) -> Result<Self, anyhow::Error> {
+    pub fn from_ast(
+        mut self,
+        node: &AstNode,
+        functions: &HashMap<String, u64>,
+    ) -> Result<Self, SymbolError> {
         match node {
-            AstNode::Function { name, body, stype, .. } => {
+            AstNode::Function {
+                name, body, stype, ..
+            } => {
                 self.symbol.name = name.to_string();
                 self.symbol.symbol_type = *stype;
                 self.symbol.content = from_nodes(body.to_vec(), functions)?;

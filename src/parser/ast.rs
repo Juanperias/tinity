@@ -1,7 +1,22 @@
 use super::token::Token;
-use anyhow::{Result, anyhow};
 use crate::binary::symbol::SymbolType;
 use std::collections::HashMap;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum AstError {
+    #[error("Nested functions are not allowed")]
+    NestedFunction,
+
+    #[error("Code outside of Function")]
+    OutsideOfFunction,
+
+    #[error("A function has not been closed")]
+    FnNotClosed,
+
+    #[error("EndFn without matching Fn")]
+    EndFnWithoutFn,
+}
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AstNode {
@@ -13,7 +28,7 @@ pub enum AstNode {
     },
     Sum {
         numbers: Vec<i64>,
-        dist: String
+        dist: String,
     },
     Load {
         dist: String,
@@ -24,16 +39,17 @@ pub enum AstNode {
         target: String,
         pc: u64,
     },
-    Ret
+    Ret,
 }
 
-pub fn get_from_tokens(tokens: Vec<Token>) -> Result<(Vec<AstNode>, HashMap<String, u64>)> {
+pub fn get_from_tokens(
+    tokens: Vec<Token>,
+) -> Result<(Vec<AstNode>, HashMap<String, u64>), AstError> {
     #[derive(Debug)]
     struct CurrentFunction {
         name: String,
         body: Vec<AstNode>,
         pc: u64,
-
     }
 
     let mut stype = SymbolType::Private;
@@ -43,86 +59,99 @@ pub fn get_from_tokens(tokens: Vec<Token>) -> Result<(Vec<AstNode>, HashMap<Stri
     // Contains the PC addr of all functions
     let mut functions_hashmap = HashMap::new();
 
-
     for token in tokens {
         match token {
             Token::Fn(name) => {
                 if current_function.is_some() {
-                    return Err(anyhow!(format!("Nested function {} is not allowed", name))); 
+                    return Err(AstError::NestedFunction);
                 }
 
                 current_function = Some(CurrentFunction {
-                    name,                    
+                    name,
                     body: Vec::new(),
                     pc: current_pc,
                 });
             }
             Token::Sum(params) => {
-                let current = current_function.as_mut().expect("Sum outside of function");
-                if params.1.len() < 2 {
-                    return Err(anyhow!("In a sum there must have been at least two parameters"));
-                }
+                let current = match current_function.as_mut() {
+                    Some(s) => s,
+                    None => return Err(AstError::OutsideOfFunction),
+                };
 
                 current.body.push(AstNode::Sum {
                     dist: params.0,
                     numbers: params.1,
                 });
-                
+
                 current_pc += 4;
-            },
+            }
             Token::Go(target) => {
-                let current = current_function.as_mut().expect("Go outside of function");
+                let current = match current_function.as_mut() {
+                    Some(s) => s,
+                    None => return Err(AstError::OutsideOfFunction),
+                };
                 current.body.push(AstNode::Go {
                     pc: current_pc,
-                    target
+                    target,
                 });
 
                 current_pc += 4;
-            },
+            }
             Token::Syscall => {
-                let current = current_function.as_mut().expect("Syscall outside of function");
+                let current = match current_function.as_mut() {
+                    Some(s) => s,
+                    None => return Err(AstError::OutsideOfFunction),
+                };
                 current.body.push(AstNode::Syscall);
-                
+
                 current_pc += 4;
             }
             Token::Load(params) => {
-                let current = current_function.as_mut().expect("Load outside of function");
+                let current = match current_function.as_mut() {
+                    Some(s) => s,
+                    None => return Err(AstError::OutsideOfFunction),
+                };
 
                 current.body.push(AstNode::Load {
                     dist: params.0,
-                    value: params.1
+                    value: params.1,
                 });
 
                 current_pc += 4;
-            },
+            }
             Token::Global => {
                 stype = SymbolType::Global;
-            },
+            }
             Token::Ret => {
-                let current = current_function.as_mut().expect("Ret outside of function");
- 
+                let current = match current_function.as_mut() {
+                    Some(s) => s,
+                    None => return Err(AstError::OutsideOfFunction),
+                };
+
                 current.body.push(AstNode::Ret);
 
                 current_pc += 4;
-            },
+            }
             Token::EndFn => {
-                let current = current_function.take().expect("EndFn without matching Fn");
+                let current = match current_function.take() {
+                    Some(s) => s,
+                    None => return Err(AstError::EndFnWithoutFn),
+                };
                 functions.push(AstNode::Function {
                     name: current.name.clone(),
                     body: current.body,
                     pc: current.pc,
-                    stype
+                    stype,
                 });
 
                 functions_hashmap.insert(current.name, current.pc);
-            },
+            }
         }
     }
 
     if current_function.is_some() {
-        return Err(anyhow!("A function has not been closed"));
+        return Err(AstError::FnNotClosed);
     }
 
     Ok((functions, functions_hashmap))
 }
-

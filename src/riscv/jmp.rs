@@ -1,5 +1,5 @@
+use super::immediate::{immediate_to_endian, ImmediateInstruction};
 use super::regs::Reg;
-use super::immediate::{ImmediateInstruction, immediate_to_endian};
 
 pub fn jarl(dist: Reg, rs1: Reg, offset: i64) -> Vec<u8> {
     immediate_to_endian(ImmediateInstruction {
@@ -29,9 +29,7 @@ pub fn jal(target_pc: u64, current_pc: u64, rd: Reg) -> Vec<u8> {
         | ((offset_in_units & 0x400) << 10)
         | ((offset_in_units & 0x7F800) >> 11);
 
-    let instruction = imm as u32
-        | (rd as u32) << 7  
-        | 0x6F;             
+    let instruction = imm as u32 | (rd as u32) << 7 | 0x6F;
 
     instruction.to_le_bytes().to_vec()
 }

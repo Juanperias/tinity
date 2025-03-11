@@ -1,6 +1,18 @@
-use anyhow::{anyhow, Result};
 use logos::Logos;
+use std::fmt::Display;
+use thiserror::Error;
 use tracing::error;
+
+#[derive(Error, Debug)]
+pub enum LexerError {
+    SyntaxError,
+}
+
+impl Display for LexerError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
 #[derive(Logos, Debug, PartialEq)]
 #[logos(skip r"[ \t\n\f]+")]
@@ -59,7 +71,7 @@ pub enum Token {
     EndFn,
 }
 
-pub fn get_tokens(input: String) -> Result<Vec<Token>> {
+pub fn get_tokens(input: String) -> Result<Vec<Token>, LexerError> {
     let mut lex = Token::lexer(&input);
     let mut tokens = Vec::new();
     let mut has_errors = true;
@@ -75,7 +87,7 @@ pub fn get_tokens(input: String) -> Result<Vec<Token>> {
     }
 
     if !has_errors {
-        return Err(anyhow!("Cannot compile because: Syntax Error"));
+        return Err(LexerError::SyntaxError);
     }
 
     Ok(tokens)

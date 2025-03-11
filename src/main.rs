@@ -2,26 +2,25 @@ mod binary;
 mod parser;
 mod riscv;
 
-use anyhow::Result;
 use binary::symbol::SymbolBuilder;
 use binary::{elf::Elf, Binary, Section};
+use clap::Parser;
 use object::{Architecture, Endianness};
 use parser::ast::get_from_tokens;
 use parser::token::get_tokens;
 use tracing::Level;
-use tracing_subscriber::FmtSubscriber;
-use clap::Parser;
 use tracing::{error, info};
+use tracing_subscriber::FmtSubscriber;
 
 #[derive(Parser)]
 struct Args {
     file: String,
 
     #[clap(short, long)]
-    output: Option<String>
+    output: Option<String>,
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::TRACE)
         .finish();
@@ -35,6 +34,7 @@ fn main() -> Result<()> {
     let input = std::fs::read_to_string(args.file)?;
     let tokens = get_tokens(input)?;
     let (ast, functions) = get_from_tokens(tokens)?;
+  
 
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
     info!("Generating dist file");
@@ -52,13 +52,13 @@ fn main() -> Result<()> {
             elf.write_section(Section::Text, symbol);
         } else if let Err(e) = builder {
             error!("Error processing AST: {}", e);
+            std::process::exit(1);
         }
     });
 
     elf.save(&mut f).unwrap();
 
     info!("Compiled successfully");
-
 
     Ok(())
 }

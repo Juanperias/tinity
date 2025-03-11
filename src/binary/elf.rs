@@ -1,6 +1,5 @@
 use super::symbol;
 use super::{Binary, Section};
-use anyhow::Result;
 use object::write::Object;
 use object::{
     write::{SectionId, SectionKind},
@@ -8,6 +7,16 @@ use object::{
 };
 use std::fs::File;
 use std::io::Write;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum ElfError {
+    #[error("Io Error {0}")]
+    IoError(#[from] std::io::Error),
+
+    #[error("Object Error {0}")]
+    ObjectError(#[from] object::write::Error),
+}
 
 // High level abstraccion of Object
 pub struct Elf<'a> {
@@ -74,10 +83,12 @@ impl<'a> Elf<'a> {
 }
 
 impl Binary for Elf<'_> {
-    fn get(&self) -> Result<Vec<u8>> {
+    type Error = ElfError;
+
+    fn get(&self) -> Result<Vec<u8>, Self::Error> {
         Ok(self.object.write()?)
     }
-    fn save(&self, target: &mut File) -> Result<()> {
+    fn save(&self, target: &mut File) -> Result<(), Self::Error> {
         let content = self.get()?;
         target.write_all(&content)?;
         Ok(())

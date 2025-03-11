@@ -1,7 +1,6 @@
 pub mod elf;
 pub mod symbol;
 
-use anyhow::Result;
 use object::write::SectionId;
 use std::fs::File;
 use symbol::Symbol;
@@ -16,8 +15,10 @@ pub enum Section {
 }
 
 pub trait Binary {
-    fn get(&self) -> Result<Vec<u8>>;
+    type Error;
+
+    fn get(&self) -> Result<Vec<u8>, Self::Error>;
     fn write_section(&mut self, section: Section, symbol: Symbol);
     fn create_section(&mut self, section: Section);
-    fn save(&self, target: &mut File) -> Result<()>;
+    fn save(&self, target: &mut File) -> Result<(), Self::Error>;
 }
