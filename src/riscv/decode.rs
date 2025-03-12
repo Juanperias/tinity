@@ -1,5 +1,5 @@
 use super::immediate::{addi, ecall};
-use super::jmp::{jal, jarl};
+use super::jmp::{jal, jalr};
 use super::regs::Reg;
 use crate::parser::ast::AstNode;
 use std::collections::HashMap;
@@ -51,7 +51,7 @@ pub fn node_to_opcode(
             opcode.extend(jal(*target_address, pc, Reg::Ra));
         }
         AstNode::Ret => {
-            opcode.extend(jarl(Reg::Zero, Reg::Ra, 0));
+            opcode.extend(jalr(Reg::Zero, Reg::Ra, 0));
         }
         AstNode::Nop => {
             opcode.extend(addi(Reg::Zero, Reg::Zero, 0));

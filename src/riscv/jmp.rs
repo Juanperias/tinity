@@ -1,7 +1,7 @@
 use super::immediate::{immediate_to_endian, ImmediateInstruction};
 use super::regs::Reg;
 
-pub fn jarl(dist: Reg, rs1: Reg, offset: i64) -> Vec<u8> {
+pub fn jalr(dist: Reg, rs1: Reg, offset: i64) -> Vec<u8> {
     immediate_to_endian(ImmediateInstruction {
         rs1,
         rd: dist,
