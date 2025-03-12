@@ -34,7 +34,6 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let input = std::fs::read_to_string(args.file)?;
     let tokens = get_tokens(input)?;
     let (ast, functions) = get_from_tokens(tokens)?;
-  
 
     let mut elf = Elf::new(Architecture::Riscv64, Endianness::Little);
     info!("Generating dist file");

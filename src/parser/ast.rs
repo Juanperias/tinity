@@ -40,6 +40,7 @@ pub enum AstNode {
         pc: u64,
     },
     Ret,
+    Nop,
 }
 
 pub fn get_from_tokens(
@@ -82,6 +83,16 @@ pub fn get_from_tokens(
                     dist: params.0,
                     numbers: params.1,
                 });
+
+                current_pc += 4;
+            }
+            Token::Nop => {
+                let current = match current_function.as_mut() {
+                    Some(s) => s,
+                    None => return Err(AstError::OutsideOfFunction),
+                };
+
+                current.body.push(AstNode::Nop);
 
                 current_pc += 4;
             }

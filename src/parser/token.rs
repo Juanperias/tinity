@@ -67,6 +67,9 @@ pub enum Token {
     #[token("@syscall")]
     Syscall,
 
+    #[token("@nop")]
+    Nop,
+
     #[token("@endfn")]
     EndFn,
 }

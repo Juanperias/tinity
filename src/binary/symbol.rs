@@ -13,7 +13,7 @@ pub enum SymbolType {
 #[derive(Error, Debug)]
 pub enum SymbolError {
     #[error("Decode error: {0}")]
-    DecodeError(#[from] DecodeError)
+    DecodeError(#[from] DecodeError),
 }
 
 #[derive(Debug)]

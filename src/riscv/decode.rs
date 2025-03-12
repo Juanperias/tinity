@@ -53,6 +53,9 @@ pub fn node_to_opcode(
         AstNode::Ret => {
             opcode.extend(jarl(Reg::Zero, Reg::Ra, 0));
         }
+        AstNode::Nop => {
+            opcode.extend(addi(Reg::Zero, Reg::Zero, 0));
+        }
     }
     Ok(opcode)
 }
