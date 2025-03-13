@@ -2,7 +2,8 @@ $global
 @fn _start
    @nop
    @go loop
-   @sum %a7, 10, 10, 0, %zero, 10, 10, 10, 10, 10, 10, 10, 0, 3
+   
+   @sum i64, %a7, 10, 10, %zero, 0, 10, 10, 10, 10, 10, 10, 10, 0, 3, 1, -1
    @load %a0, 0
    @syscall
 @endfn

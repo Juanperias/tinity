@@ -4,7 +4,9 @@ use super::regs::Reg;
 use crate::parser::ast::AstNode;
 use std::collections::HashMap;
 use std::convert::TryFrom;
+use crate::parser::types::{Type, TypeError};
 use thiserror::Error;
+use crate::type_from_string;
 
 #[derive(Error, Debug)]
 pub enum DecodeError {
@@ -15,7 +17,10 @@ pub enum DecodeError {
     FnNotFound(String),
 
     #[error("{0}")]
-    JmpError(#[from] JmpError)
+    JmpError(#[from] JmpError),
+
+    #[error("{0}")]
+    TypeError(#[from] TypeError)
 }
 
 type Opcode = Vec<u8>;
@@ -27,14 +32,26 @@ pub fn node_to_opcode(
     let mut opcode = Vec::new();
     match node {
         AstNode::Function { .. } => {}
-        AstNode::Sum { numbers, dist } => {
+        AstNode::Sum { numbers, dist, t } => {
             let reg = match Reg::try_from(dist.clone()) {
                 Ok(r) => r,
                 Err(_) => return Err(DecodeError::InvalidRegister(dist)),
             };
-            let result = numbers.iter().sum();
+            let mut result = type_from_string!(t.as_str(), "0");
 
-            opcode.extend(addi(reg, Reg::Zero, result));
+            for n in numbers {
+                match n {
+                    Type::Value(v) => {
+                        match v.as_str() {
+                            "%zero" => {},
+                            _ => {}
+                        }
+                    },
+                    num => { result.try_add(num)? }
+                }
+            }
+
+            opcode.extend(addi(reg, Reg::Zero, result.try_into()?));
         }
         AstNode::Load { dist, value } => {
             let reg = match Reg::try_from(dist.clone()) {

@@ -1,4 +1,5 @@
 use super::token::Token;
+use super::types::Type;
 use crate::binary::symbol::SymbolType;
 use std::collections::HashMap;
 use thiserror::Error;
@@ -27,8 +28,9 @@ pub enum AstNode {
         pc: u64,
     },
     Sum {
-        numbers: Vec<i64>,
+        numbers: Vec<Type>,
         dist: String,
+        t: String,
     },
     Load {
         dist: String,
@@ -82,6 +84,7 @@ pub fn get_from_tokens(
                 current.body.push(AstNode::Sum {
                     dist: params.0,
                     numbers: params.1,
+                    t: params.2
                 });
 
                 current_pc += 4;

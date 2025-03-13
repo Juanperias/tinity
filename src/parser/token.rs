@@ -1,3 +1,5 @@
+use super::types::Type;
+use crate::type_from_string;
 use logos::Logos;
 use std::fmt::Display;
 use thiserror::Error;
@@ -23,22 +25,21 @@ pub enum Token {
     })]
     Fn(String),
 
-    #[regex(r"@sum\s+%([a-zA-Z0-9_]+)((?:,\s*-?\d+)+)", |lex| {  
+    #[regex(r"@sum\s+([a-zA-Z_][a-zA-Z0-9_]*|\d+),\s*(%?[a-zA-Z_][a-zA-Z0-9_]*|\d+)((?:,\s*(-?\d+|%[a-zA-Z_][a-zA-Z0-9_]*))+)", |lex| {  
         let last: String = lex.slice().replace(" ", "").chars().skip(4).collect();
+        let parts: Vec<&str> = last.split(',').collect();
+        let t = parts[0];
+        let dist = parts[1].to_string().replace("%", "");
 
-        let p = last.find('%').unwrap();
-        let fc = last.find(',').unwrap();
+        let mut numbers = Vec::new();
 
-        let dist: String = last[p + 1..fc].to_string();
-
-        let numbers: Vec<i64> = last[fc + 1..]
-            .split(',')
-            .filter_map(|s| s.parse::<i64>().ok())
-            .collect();
-
-        (dist, numbers)
+        for part in parts.into_iter().skip(2) {
+            numbers.push(type_from_string!(t, part)); 
+        }
+        
+        (dist, numbers, t.to_string())
     })]
-    Sum((String, Vec<i64>)),
+    Sum((String, Vec<Type>, String)),
 
     #[regex(r"@go\s+([a-zA-Z_][a-zA-Z0-9_]*)", |lex| {
         let last = lex.slice();

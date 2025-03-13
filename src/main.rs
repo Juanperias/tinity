@@ -42,13 +42,13 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let mut f = std::fs::File::create(output)?;
     elf.create_section(Section::Text);
-
+    
     ast.iter().for_each(|node| {
         let builder = SymbolBuilder::new().from_ast(&node, &functions);
 
         if let Ok(builder) = builder {
             let symbol = builder.build();
-         
+
             elf.write_section(Section::Text, symbol);
         } else if let Err(e) = builder {
             error!("Error processing AST: {}", e);

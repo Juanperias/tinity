@@ -1,6 +1,6 @@
 use super::immediate::{immediate_to_endian, ImmediateInstruction};
-use thiserror::Error;
 use super::regs::Reg;
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum JmpError {
