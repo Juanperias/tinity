@@ -48,6 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
         if let Ok(builder) = builder {
             let symbol = builder.build();
+         
             elf.write_section(Section::Text, symbol);
         } else if let Err(e) = builder {
             error!("Error processing AST: {}", e);

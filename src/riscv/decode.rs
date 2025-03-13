@@ -1,5 +1,5 @@
 use super::immediate::{addi, ecall};
-use super::jmp::{jal, jalr};
+use super::jmp::{jal, jalr, JmpError};
 use super::regs::Reg;
 use crate::parser::ast::AstNode;
 use std::collections::HashMap;
@@ -13,6 +13,9 @@ pub enum DecodeError {
 
     #[error("Target function {0}, not found")]
     FnNotFound(String),
+
+    #[error("{0}")]
+    JmpError(#[from] JmpError)
 }
 
 type Opcode = Vec<u8>;
@@ -48,7 +51,7 @@ pub fn node_to_opcode(
                 Some(s) => s,
                 None => return Err(DecodeError::FnNotFound(target)),
             };
-            opcode.extend(jal(*target_address, pc, Reg::Ra));
+            opcode.extend(jal(*target_address, pc, Reg::Ra)?);
         }
         AstNode::Ret => {
             opcode.extend(jalr(Reg::Zero, Reg::Ra, 0));
