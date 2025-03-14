@@ -19,29 +19,29 @@ impl Display for LexerError {
 #[derive(Logos, Debug, PartialEq)]
 #[logos(skip r"[ \t\n\f]+")]
 pub enum Token {
-    #[regex(r"@fn\s+([a-zA-Z_][a-zA-Z0-9_]*)", |lex| {
+    #[regex(r"@fn\s+[A-Za-z_]\w*", |lex| {
         let last = lex.slice();
         last.split_whitespace().nth(1).unwrap().to_string()
     })]
     Fn(String),
 
-    #[regex(r"@sum\s+([a-zA-Z_][a-zA-Z0-9_]*|\d+),\s*(%?[a-zA-Z_][a-zA-Z0-9_]*|\d+)((?:,\s*(-?\d+|%[a-zA-Z_][a-zA-Z0-9_]*))+)", |lex| {  
-        let last: String = lex.slice().replace(" ", "").chars().skip(4).collect();
-        let parts: Vec<&str> = last.split(',').collect();
-        let t = parts[0];
-        let dist = parts[1].to_string().replace("%", "");
+    #[regex(r"@sum\s+[\w%\s,-]+", |lex| {
+        let params: Vec<&str> = lex.slice()[4..].split(',')
+            .map(str::trim)
+            .collect();
 
-        let mut numbers = Vec::new();
+        let t = params[0];
+        let dist = params[1].trim_start_matches('%').to_string();
 
-        for part in parts.into_iter().skip(2) {
-            numbers.push(type_from_string!(t, part));
-        }
-
+        let numbers = params.iter().skip(2)
+            .map(|&s| type_from_string!(t, s))
+        .   collect();
+    
         (dist, numbers, t.to_string())
     })]
     Sum((String, Vec<Type>, String)),
 
-    #[regex(r"@go\s+([a-zA-Z_][a-zA-Z0-9_]*)", |lex| {
+    #[regex(r"@go\s+[A-Za-z_]\w*", |lex| {
         let last = lex.slice();
         last.split_whitespace().nth(1).unwrap().to_string()
     })]
