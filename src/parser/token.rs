@@ -34,9 +34,9 @@ pub enum Token {
         let mut numbers = Vec::new();
 
         for part in parts.into_iter().skip(2) {
-            numbers.push(type_from_string!(t, part)); 
+            numbers.push(type_from_string!(t, part));
         }
-        
+
         (dist, numbers, t.to_string())
     })]
     Sum((String, Vec<Type>, String)),
@@ -60,10 +60,36 @@ pub enum Token {
             let parts = input.split(',');
             let params: Vec<&str> = parts.collect();
 
-            (params[0].to_string(), params[1].parse::<i64>().unwrap())            
+            (params[0].to_string(), params[1].parse::<i64>().unwrap())
         }
     )]
     Load((String, i64)),
+
+    // Register Add
+    #[regex(
+        r"@radd\s+%(\w+)\s*,\s+%(-?\w+)", 
+        |lex| {
+            let input: String = lex.slice().replace(" ", "").chars().skip(6).collect();
+            let parts = input.split(',');
+            let params: Vec<&str> = parts.collect();
+
+            (params[0].to_string(), params[1].to_string().replace("%", ""))            
+        }
+    )]
+    Radd((String, String)),
+
+    // Register Sub
+    #[regex(
+        r"@rsub\s+%(\w+)\s*,\s+%(-?\w+)", 
+        |lex| {
+            let input: String = lex.slice().replace(" ", "").chars().skip(6).collect();
+            let parts = input.split(',');
+            let params: Vec<&str> = parts.collect();
+
+            (params[0].to_string(), params[1].to_string().replace("%", ""))            
+        }
+    )]
+    Rsub((String, String)),
 
     #[token("@syscall")]
     Syscall,

@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let mut f = std::fs::File::create(output)?;
     elf.create_section(Section::Text);
-    
+
     ast.iter().for_each(|node| {
         let builder = SymbolBuilder::new().from_ast(&node, &functions);
 

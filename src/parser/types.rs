@@ -10,7 +10,6 @@ pub enum TypeError {
 
     #[error("there was an error trying to cast {0}")]
     CannotCast(Type),
-
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -33,7 +32,6 @@ pub enum Type {
     // Registers or Variables, starts with %
     Value(String),
 }
-
 
 impl Type {
     pub fn try_add(&mut self, val: Type) -> Result<(), TypeError> {
@@ -79,7 +77,6 @@ impl std::fmt::Display for Type {
         write!(f, "{:?}", self)
     }
 }
-
 
 #[macro_export]
 macro_rules! type_from_string {
@@ -146,7 +143,6 @@ impl From<&str> for Type {
         Type::from(value.to_string())
     }
 }
-
 
 macro_rules! to_type {
     ($($t:ty, $variant:ident),*) => {

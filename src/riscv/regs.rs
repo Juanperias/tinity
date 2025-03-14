@@ -86,11 +86,54 @@ impl FromStr for Reg {
     }
 }
 
-impl TryFrom<String> for Reg {
+impl TryFrom<&String> for Reg {
     type Error = String;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        Ok(Reg::from_str(&value)?)
+    fn try_from(value: &String) -> Result<Self, Self::Error> {
+        Ok(Reg::from_str(value)?)
+    }
+}
+
+impl From<&Reg> for u64 {
+    fn from(value: &Reg) -> Self {
+        match value {
+            Reg::Zero => 0x00,
+            Reg::Ra => 0x01,
+            Reg::Sp => 0x02,
+            Reg::Gp => 0x03,
+            Reg::Tp => 0x04,
+            Reg::T0 => 0x05,
+            Reg::T1 => 0x06,
+            Reg::T2 => 0x07,
+            Reg::S0 => 0x08,
+            Reg::S1 => 0x09,
+            Reg::A0 => 0x0A,
+            Reg::A1 => 0x0B,
+            Reg::A2 => 0x0C,
+            Reg::A3 => 0x0D,
+            Reg::A4 => 0x0E,
+            Reg::A5 => 0x0F,
+            Reg::A6 => 0x10,
+            Reg::A7 => 0x11,
+            Reg::S2 => 0x12,
+            Reg::S3 => 0x13,
+            Reg::S4 => 0x14,
+            Reg::S5 => 0x15,
+            Reg::S6 => 0x16,
+            Reg::S7 => 0x17,
+            Reg::S8 => 0x18,
+            Reg::S9 => 0x19,
+            Reg::S10 => 0x1A,
+            Reg::S11 => 0x1B,
+            Reg::T3 => 0x1C,
+            Reg::T4 => 0x1D,
+            Reg::T5 => 0x1E,
+            Reg::T6 => 0x1F,
+            Reg::Mstatus => 0x300,
+            Reg::Mepc => 0x341,
+            Reg::Mtvec => 0x305,
+            Reg::Mcause => 0x342,
+        }
     }
 }
 

@@ -41,6 +41,14 @@ pub enum AstNode {
         target: String,
         pc: u64,
     },
+    Radd {
+        target: String,
+        rs1: String,
+    },
+    Rsub {
+        target: String,
+        rs1: String,
+    },
     Ret,
     Nop,
 }
@@ -75,19 +83,51 @@ pub fn get_from_tokens(
                     pc: current_pc,
                 });
             }
+            Token::Radd(params) => {
+                let current = match current_function.as_mut() {
+                    Some(s) => s,
+                    None => return Err(AstError::OutsideOfFunction),
+                };
+
+                current.body.push(AstNode::Radd {
+                    target: params.0,
+                    rs1: params.1,
+                });
+
+                current_pc += 4;
+            }
+            Token::Rsub(params) => {
+                let current = match current_function.as_mut() {
+                    Some(s) => s,
+                    None => return Err(AstError::OutsideOfFunction),
+                };
+
+                current.body.push(AstNode::Rsub {
+                    target: params.0,
+                    rs1: params.1,
+                });
+
+                current_pc += 4;
+            }
             Token::Sum(params) => {
                 let current = match current_function.as_mut() {
                     Some(s) => s,
                     None => return Err(AstError::OutsideOfFunction),
                 };
 
+                let count = params
+                    .1
+                    .iter()
+                    .filter(|&x| matches!(x, Type::Value(value) if value != "%zero"))
+                    .count();
+
                 current.body.push(AstNode::Sum {
                     dist: params.0,
                     numbers: params.1,
-                    t: params.2
+                    t: params.2,
                 });
 
-                current_pc += 4;
+                current_pc += 4 + count as u64;
             }
             Token::Nop => {
                 let current = match current_function.as_mut() {
