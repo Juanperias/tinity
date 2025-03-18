@@ -18,87 +18,37 @@ impl Display for LexerError {
 
 #[derive(Logos, Debug, PartialEq)]
 #[logos(skip r"[ \t\n\f]+")]
-pub enum Token {
-    #[regex(r"@fn\s+[A-Za-z_]\w*", |lex| {
-        let last = lex.slice();
-        last.split_whitespace().nth(1).unwrap().to_string()
-    })]
-    Fn(String),
+pub enum Token { 
+    #[regex(r"[A-Za-z_][A-Za-z0-9_]*:", |lex| {
+        lex.slice().replace(":", "").to_string()
+    })] 
+    Label(String),
 
-    #[regex(r"@sum\s+[\w%\s,-]+", |lex| {
-        let params: Vec<&str> = lex.slice()[4..].split(',')
-            .map(str::trim)
-            .collect();
+    #[token("{")]
+    CurlyBracketStart,
 
-        let t = params[0];
-        let dist = params[1].trim_start_matches('%').to_string();
+    #[token("}")] 
+    CurlyBracketEnd,
 
-        let numbers = params.iter().skip(2)
-            .map(|&s| type_from_string!(t, s))
-        .   collect();
-    
-        (dist, numbers, t.to_string())
-    })]
-    Sum((String, Vec<Type>, String)),
+    #[token("(")]
+    ParenthesesStart,
 
-    #[regex(r"@go\s+[A-Za-z_]\w*", |lex| {
-        let last = lex.slice();
-        last.split_whitespace().nth(1).unwrap().to_string()
-    })]
-    Go(String),
+    #[token(")")]
+    ParenthesesEnd,
 
-    #[token("@ret")]
-    Ret,
 
-    #[token("$global")]
-    Global,
+    #[token("define")]
+    Define,
 
-    #[regex(
-        r"@load\s+%(\w+)\s*,\s*(-?\d+)", 
-        |lex| {
-            let input: String = lex.slice().replace(" ", "").chars().skip(6).collect();
-            let parts = input.split(',');
-            let params: Vec<&str> = parts.collect();
+    #[regex(r"[A-Za-z_][A-Za-z0-9_]*", |lex| {
+        lex.slice().to_string()
+    })] 
+    Identifier(String),
 
-            (params[0].to_string(), params[1].parse::<i64>().unwrap())
-        }
-    )]
-    Load((String, i64)),
-
-    // Register Add
-    #[regex(
-        r"@radd\s+%(\w+)\s*,\s+%(-?\w+)", 
-        |lex| {
-            let input: String = lex.slice().replace(" ", "").chars().skip(6).collect();
-            let parts = input.split(',');
-            let params: Vec<&str> = parts.collect();
-
-            (params[0].to_string(), params[1].to_string().replace("%", ""))            
-        }
-    )]
-    Radd((String, String)),
-
-    // Register Sub
-    #[regex(
-        r"@rsub\s+%(\w+)\s*,\s+%(-?\w+)", 
-        |lex| {
-            let input: String = lex.slice().replace(" ", "").chars().skip(6).collect();
-            let parts = input.split(',');
-            let params: Vec<&str> = parts.collect();
-
-            (params[0].to_string(), params[1].to_string().replace("%", ""))            
-        }
-    )]
-    Rsub((String, String)),
-
-    #[token("@syscall")]
-    Syscall,
-
-    #[token("@nop")]
-    Nop,
-
-    #[token("@endfn")]
-    EndFn,
+    #[regex(r"@[A-Za-z_][A-Za-z0-9_]*", |lex| {
+        lex.slice().to_string()
+    })] 
+    GlobalEntity(String)
 }
 
 pub fn get_tokens(input: String) -> Result<Vec<Token>, LexerError> {
@@ -110,7 +60,7 @@ pub fn get_tokens(input: String) -> Result<Vec<Token>, LexerError> {
         match token {
             Ok(t) => tokens.push(t),
             Err(_) => {
-                error!("Invalid Token {}", lex.slice());
+                error!("Invalid Token: {}", lex.slice());
                 has_errors = false;
             }
         }

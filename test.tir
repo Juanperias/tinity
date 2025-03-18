@@ -1,11 +1,5 @@
-$global
-@fn _start
-   @load %a2, 3
-   @sum i64, %a7, 10, 10, %zero, 0, 10, 10, 10, 10, 10, 10, 10, 0, %a2
-   @load %a0, 0
-   @load %t3, 93
-   @rsub %a7, %t3
+define i32 @main() {
+entry:
 
-   @syscall
-@endfn
+}
 
