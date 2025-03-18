@@ -36,6 +36,10 @@ pub enum Token {
     #[token(")")]
     ParenthesesEnd,
 
+    #[regex(r"\d+(\.\d+)?\s", |lex| {
+        lex.slice().trim().to_string()
+    })]
+    Number(String),
 
     #[token("define")]
     Define,
